@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: ${APP_NAME}
+  datasource:
+    driver-class-name: ${DRIVER_CLASS_NAME}
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: none
+  rabbitmq:
+    host: 127.0.0.1
+    username: admin
+    password: admin
+    queues:
+      payment_confirmed: payment_confirmed
+      storage_confirmed: storage_confirmed
+      delivery_runed: delivery_runed
+      delivery_completed: delivery_completed
+      storage_info: storage_info
+      delivery_info: delivery_info
+
+
+server:
+  port: ${APP_PORT}
+
+management:
+  metrics:
+    distribution:
+      slo:
+        http.server.request: 10ms, 50ms, 100ms, 200ms, 300ms, 400ms, 500ms
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+endpoint:
+  storage_url: ${STORAGE_URL}
+  delivery_url: ${DELIVERY_URL}
+
+app:
+  auth:
+    basic:
+      storageLogin: ${STORAGE_LOGIN}
+      storagePassword: ${STORAGE_PASSWORD}
+      deliveryLogin: ${DELIVERY_LOGIN}
+      deliveryPassword: ${DELIVERY_PASSWORD}
+

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+
+
+    <changeSet id="create_basket_table_20221107" author="Botalov.Egor">
+        <createTable tableName="basket">
+            <column name="id" type="BIGINT" remarks="ID записи">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="basket_pk"/>
+            </column>
+            <column name="order_id" type="BIGINT" remarks="Связь с записью в таблице Журнал событий (СИ)"/>
+            <column name="client_uuid" type="UUID" remarks="идентификатор клиента"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="basket"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_basket_item_table_20221107" author="Botalov.Egor">
+        <createTable tableName="basket_item">
+            <column name="id" type="BIGINT" remarks="ID записи">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="basket_item_pk"/>
+            </column>
+            <column name="basket_id" type="BIGINT"/>
+            <column name="catalog_item_id" type="BIGINT"/>
+            <column name="amount" type="INTEGER"/>
+            <column name="unit_price" type="VARCHAR"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="basket_item"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_delivery_info_table_20221107" author="Botalov.Egor">
+        <createTable tableName="delivery_info">
+            <column name="id" type="BIGINT" remarks="ID записи">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="delivery_info_pk"/>
+            </column>
+            <column name="unit_price" type="VARCHAR"/>
+            <column name="delivery_type" type="VARCHAR"/>
+            <column name="start_interval" type="TIMESTAMP"/>
+            <column name="end_interval" type="TIMESTAMP"/>
+            <column name="address" type="VARCHAR"/>
+            <column name="contact_number" type="VARCHAR"/>
+            <column name="contact_name" type="VARCHAR"/>
+            <column name="additional_info" type="VARCHAR"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="delivery_info"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_order_table_20221107" author="Botalov.Egor">
+        <createTable tableName="order">
+            <column name="id" type="BIGINT" remarks="ID записи">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="order_pk"/>
+            </column>
+            <column name="client_uuid" type="UUID"/>
+            <column name="status_id" type="INTEGER"/>
+            <column name="basket_id" type="BIGINT"/>
+            <column name="payment_info_id" type="BIGINT"/>
+            <column name="delivery_info_id" type="BIGINT"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="order"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_order_status_catalog_table_20221107" author="Botalov.Egor">
+        <createTable tableName="order_status_catalog">
+            <column name="id" type="INTEGER" remarks="ID записи">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="order_status_catalog_pk"/>
+            </column>
+            <column name="name" type="VARCHAR"/>
+            <column name="code" type="VARCHAR"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="order_status_catalog"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="create_payment_info_table_20221107" author="Botalov.Egor">
+        <createTable tableName="payment_info">
+            <column name="id" type="BIGINT" remarks="ID записи">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="payment_info_pk"/>
+            </column>
+            <column name="payment_status" type="VARCHAR"/>
+            <column name="payment_type" type="VARCHAR"/>
+            <column name="last_change_time" type="TIMESTAMP"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="payment_info"/>
+        </rollback>
+    </changeSet>
+
+
+
+    <changeSet id="load_data_order_status_catalog_table_20221107" author="Botalov.Egor">
+        <loadUpdateData tableName="order_status_catalog"
+                        primaryKey="id"
+                        file="db/changelog/data.csv"/>
+        <rollback>
+            <delete tableName="order_status_catalog"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="add_foreign_key_basket_to_order" author="Botalov.Egor">
+        <addForeignKeyConstraint baseColumnNames="order_id"
+                                 baseTableName="basket"
+                                 constraintName="basket_to_order_fk"
+                                 onDelete="NO ACTION"
+                                 onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="order"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="basket" constraintName="basket_to_order_fk"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="add_foreign_key_basket_item_to_basket" author="Botalov.Egor">
+        <addForeignKeyConstraint baseColumnNames="basket_id"
+                                 baseTableName="basket_item"
+                                 constraintName="basket_item_to_basket_fk"
+                                 onDelete="NO ACTION"
+                                 onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="basket"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="basket_item" constraintName="basket_item_to_basket_fk"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="add_foreign_key_order_to_basket" author="Botalov.Egor">
+        <addForeignKeyConstraint baseColumnNames="basket_id"
+                                 baseTableName="order"
+                                 constraintName="order_to_basket_fk"
+                                 onDelete="NO ACTION"
+                                 onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="basket"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="order" constraintName="order_to_basket_fk"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="add_foreign_key_order_to_status_catalog" author="Botalov.Egor">
+        <addForeignKeyConstraint baseColumnNames="status_id"
+                                 baseTableName="order"
+                                 constraintName="order_to_status_fk"
+                                 onDelete="NO ACTION"
+                                 onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="order_status_catalog"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="order" constraintName="order_to_status_fk"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="add_foreign_key_order_to_payment_info" author="Botalov.Egor">
+        <addForeignKeyConstraint baseColumnNames="payment_info_id"
+                                 baseTableName="order"
+                                 constraintName="order_to_payment_info_fk"
+                                 onDelete="NO ACTION"
+                                 onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="payment_info"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="order" constraintName="order_to_payment_info_fk"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="add_foreign_key_order_to_delivery_info" author="Botalov.Egor">
+        <addForeignKeyConstraint baseColumnNames="delivery_info_id"
+                                 baseTableName="order"
+                                 constraintName="order_to_delivery_info_fk"
+                                 onDelete="NO ACTION"
+                                 onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
+                                 referencedTableName="delivery_info"/>
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="order" constraintName="order_to_delivery_info_fk"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
